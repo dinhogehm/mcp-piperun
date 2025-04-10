@@ -1,70 +1,88 @@
-# piperun-mcp-server MCP Server
+# Servidor MCP para Integração com Piperun CRM
 
-A Model Context Protocol server
+Este é um servidor MCP (Model Context Protocol) baseado em TypeScript que fornece ferramentas para interagir com a API do [PipeRun CRM](https://www.pipe.run/).
 
-This is a TypeScript-based MCP server that implements a simple notes system. It demonstrates core MCP concepts by providing:
+## Funcionalidades
 
-- Resources representing text notes with URIs and metadata
-- Tools for creating new notes
-- Prompts for generating summaries of notes
+Este servidor expõe diversas ferramentas para listar, criar, obter e atualizar dados no Piperun CRM. Todas as ferramentas requerem um argumento `api_token` válido para autenticação com a API do Piperun.
 
-## Features
+### Ferramentas Disponíveis
 
-### Resources
-- List and access notes via `note://` URIs
-- Each note has a title, content and metadata
-- Plain text mime type for simple content access
+**Oportunidades:**
+*   `list_deals`: Recupera uma lista de oportunidades. (Filtros opcionais: `pipeline_id`, `person_id`, `page`, `show`)
+*   `list_deal_sources`: Recupera uma lista de origens de oportunidades.
 
-### Tools
-- `create_note` - Create new text notes
-  - Takes title and content as required parameters
-  - Stores note in server state
+**Pessoas:**
+*   `create_person`: Cria uma nova pessoa (lead/contato). (Campos: `name`, `owner_id`, `email`, `phone`, `company_id`)
 
-### Prompts
-- `summarize_notes` - Generate a summary of all stored notes
-  - Includes all note contents as embedded resources
-  - Returns structured prompt for LLM summarization
+**Empresas:**
+*   `list_companies`: Recupera uma lista de empresas. (Filtros opcionais: `page`, `show`)
+*   `get_company`: Recupera os detalhes de uma empresa específica. (Requer: `company_id`)
+*   `create_company`: Cria uma nova empresa. (Campos: `name`, `owner_id`, `email`, `phone`, etc.)
+*   `update_company`: Atualiza os dados de uma empresa existente. (Requer: `company_id`; Campos opcionais: `name`, `owner_id`, `email`, `phone`, etc.)
 
-## Development
+**Funis e Etapas:**
+*   `list_pipelines`: Recupera uma lista de funis. (Filtros opcionais: `page`, `show`)
+*   `list_stages`: Recupera uma lista de etapas de funil. (Filtros opcionais: `pipeline_id`, `page`, `show`)
 
-Install dependencies:
+**Atividades:**
+*   `list_activities`: Recupera uma lista de atividades. (Vários filtros opcionais: `page`, `show`, `with`, `sort`, `desc`, `deal_id`, `owner_id`, `requester_id`, `title`, `activity_type_id`, `status`, datas)
+*   `list_activity_types`: Recupera uma lista de tipos de atividades.
+
+**Notas:**
+*   `list_notes`: Recupera uma lista de notas. (Filtros opcionais: `page`, `show`, `deal_id`, `person_id`, `company_id`)
+*   `create_note`: Cria uma nova nota. (Requer: `content`; Associação opcional: `deal_id`, `person_id`, ou `company_id`)
+
+**Outros:**
+*   `list_items`: Recupera uma lista de produtos. (Filtros opcionais: `page`, `show`)
+*   `list_users`: Recupera uma lista de usuários (vendedores). (Filtros opcionais: `page`, `show`)
+*   `list_custom_fields`: Recupera uma lista de campos customizados.
+*   `list_tags`: Recupera uma lista de tags.
+*   `list_loss_reasons`: Recupera uma lista de motivos de perda.
+
+**Observação:** Para detalhes completos sobre os parâmetros e filtros de cada ferramenta, consulte o código-fonte (`src/index.ts`) ou a documentação da API do Piperun.
+
+## Desenvolvimento
+
+Instale as dependências:
 ```bash
 npm install
 ```
 
-Build the server:
+Compile o servidor:
 ```bash
 npm run build
 ```
 
-For development with auto-rebuild:
+Para desenvolvimento com recompilação automática:
 ```bash
 npm run watch
 ```
 
-## Installation
+## Instalação
 
-To use with Claude Desktop, add the server config:
+Para usar com o Cline (ou outro cliente MCP), adicione a configuração do servidor:
 
-On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+No MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+No Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 
 ```json
 {
   "mcpServers": {
     "piperun-mcp-server": {
-      "command": "/path/to/piperun-mcp-server/build/index.js"
+      "command": "/caminho/completo/para/piperun-mcp-server/build/index.js"
     }
   }
 }
 ```
+**Importante:** Substitua `/caminho/completo/para/` pelo caminho real onde o projeto `piperun-mcp-server` está localizado em sua máquina.
 
-### Debugging
+## Debugging
 
-Since MCP servers communicate over stdio, debugging can be challenging. We recommend using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector), which is available as a package script:
+Como servidores MCP se comunicam via stdio, a depuração pode ser desafiadora. Recomendamos usar o [MCP Inspector](https://github.com/modelcontextprotocol/inspector), que está disponível como um script do pacote:
 
 ```bash
 npm run inspector
 ```
 
-The Inspector will provide a URL to access debugging tools in your browser.
+O Inspector fornecerá uma URL para acessar as ferramentas de depuração no seu navegador.
