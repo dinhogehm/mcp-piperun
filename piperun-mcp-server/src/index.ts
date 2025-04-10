@@ -174,11 +174,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         inputSchema: {
           type: "object",
           properties: {
-            api_token: { type: "string", description: "Token da API do PipeRun" }, // Re-adicionado
-            ...listToolPaginatedInputSchema.properties, // Inclui page, show
+            // api_token é incluído pelo spread abaixo
+            ...listToolPaginatedInputSchema.properties, // Inclui api_token, page, show
             pipeline_id: { type: "number", description: "(Opcional) ID do funil para filtrar etapas" }
           },
-          required: ["api_token"] // Re-adicionado
+          required: ["api_token"] // api_token vem do spread
         }
       },
       {

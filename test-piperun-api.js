@@ -2,7 +2,7 @@
 const axios = require('axios');
 
 // Token de API fornecido
-const API_TOKEN = 'e9c00ac9c6120c6afdbcba7d0db61fa9';
+const API_TOKEN = '';
 
 // Configurar instância do Axios
 const PIPERUN_API_BASE_URL = "https://api.pipe.run/v1";
