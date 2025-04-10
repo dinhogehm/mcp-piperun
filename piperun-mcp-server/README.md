@@ -4,23 +4,17 @@ Este é um servidor MCP (Model Context Protocol) baseado em TypeScript que forne
 
 ## Autenticação
 
-Este servidor requer um token da API do Piperun para funcionar. O token deve ser fornecido através da variável de ambiente `PIPERUN_API_TOKEN` ao iniciar o servidor.
-
-Exemplo de inicialização:
-```bash
-PIPERUN_API_TOKEN="SEU_TOKEN_AQUI" node ./build/index.js
-```
-Se a variável de ambiente não for fornecida, o servidor exibirá um erro e não iniciará.
+**Importante:** Todas as ferramentas expostas por este servidor requerem um argumento obrigatório `api_token` contendo um token válido da API do Piperun para autenticar cada requisição.
 
 ## Funcionalidades
 
-Este servidor expõe diversas ferramentas para listar, criar, obter e atualizar dados no Piperun CRM. Os parâmetros específicos de cada ferramenta estão listados abaixo.
+Este servidor expõe diversas ferramentas para listar, criar, obter e atualizar dados no Piperun CRM. Os parâmetros específicos de cada ferramenta estão listados abaixo (além do `api_token` obrigatório).
 
 ### Ferramentas Disponíveis
 
 **Oportunidades:**
 *   `list_deals`: Recupera uma lista de oportunidades. (Filtros opcionais: `pipeline_id`, `person_id`, `page`, `show`)
-*   `list_deal_sources`: Recupera uma lista de origens de oportunidades. (Sem parâmetros)
+*   `list_deal_sources`: Recupera uma lista de origens de oportunidades. (Sem parâmetros adicionais)
 
 **Pessoas:**
 *   `create_person`: Cria uma nova pessoa (lead/contato). (Requer: `name`, `owner_id`; Opcional: `email`, `phone`, `company_id`)
@@ -37,7 +31,7 @@ Este servidor expõe diversas ferramentas para listar, criar, obter e atualizar 
 
 **Atividades:**
 *   `list_activities`: Recupera uma lista de atividades. (Vários filtros opcionais: `page`, `show`, `with`, `sort`, `desc`, `deal_id`, `owner_id`, `requester_id`, `title`, `activity_type_id`, `status`, datas)
-*   `list_activity_types`: Recupera uma lista de tipos de atividades. (Sem parâmetros)
+*   `list_activity_types`: Recupera uma lista de tipos de atividades. (Sem parâmetros adicionais)
 
 **Notas:**
 *   `list_notes`: Recupera uma lista de notas. (Filtros opcionais: `page`, `show`, `deal_id`, `person_id`, `company_id`)
@@ -46,9 +40,9 @@ Este servidor expõe diversas ferramentas para listar, criar, obter e atualizar 
 **Outros:**
 *   `list_items`: Recupera uma lista de produtos. (Filtros opcionais: `page`, `show`)
 *   `list_users`: Recupera uma lista de usuários (vendedores). (Filtros opcionais: `page`, `show`)
-*   `list_custom_fields`: Recupera uma lista de campos customizados. (Sem parâmetros)
-*   `list_tags`: Recupera uma lista de tags. (Sem parâmetros)
-*   `list_loss_reasons`: Recupera uma lista de motivos de perda. (Sem parâmetros)
+*   `list_custom_fields`: Recupera uma lista de campos customizados. (Sem parâmetros adicionais)
+*   `list_tags`: Recupera uma lista de tags. (Sem parâmetros adicionais)
+*   `list_loss_reasons`: Recupera uma lista de motivos de perda. (Sem parâmetros adicionais)
 
 **Observação:** Para detalhes completos sobre os parâmetros e filtros de cada ferramenta, consulte o código-fonte (`src/index.ts`) ou a documentação da API do Piperun.
 
@@ -80,17 +74,13 @@ No Windows: `%APPDATA%/Claude/claude_desktop_config.json`
 {
   "mcpServers": {
     "piperun-mcp-server": {
-      "command": "/caminho/completo/para/piperun-mcp-server/build/index.js",
-      "environment": {
-         "PIPERUN_API_TOKEN": "SEU_TOKEN_AQUI"
-      }
+      "command": "/caminho/completo/para/piperun-mcp-server/build/index.js"
+      // Nenhuma variável de ambiente é necessária aqui, pois o token é passado por ferramenta
     }
   }
 }
 ```
-**Importante:**
-*   Substitua `/caminho/completo/para/` pelo caminho real onde o projeto `piperun-mcp-server` está localizado em sua máquina.
-*   Substitua `"SEU_TOKEN_AQUI"` pelo seu token real da API do Piperun.
+**Importante:** Substitua `/caminho/completo/para/` pelo caminho real onde o projeto `piperun-mcp-server` está localizado em sua máquina.
 
 ## Debugging
 
