@@ -2,9 +2,25 @@
 
 [![CI](https://github.com/dinhogehm/mcp-piperun/actions/workflows/ci.yml/badge.svg)](https://github.com/dinhogehm/mcp-piperun/actions/workflows/ci.yml)
 
-Servidor MCP (Model Context Protocol) para integração com a API do [PipeRun CRM](https://www.pipe.run/).
+Integração completa com a API do [PipeRun CRM](https://www.pipe.run/).
 
-Este servidor permite que assistentes de IA (como Claude, Cline, etc.) interajam diretamente com o seu CRM PipeRun, possibilitando gerenciar oportunidades, contatos, empresas, atividades e muito mais.
+## Duas Versões Disponíveis
+
+| Versão | Diretório | Para Quem |
+|--------|-----------|-----------|
+| **MCP Server** | `piperun-mcp-server/` | Claude Desktop, Claude Code, Cursor |
+| **HTTP Server** | `piperun-http-server/` | n8n, Zapier, Make, APIs REST |
+
+### Qual escolher?
+
+- **Usa Claude, Cursor ou outro cliente MCP?** → Use o MCP Server
+- **Usa n8n, Zapier, Make ou precisa de API REST?** → Use o HTTP Server
+
+---
+
+# MCP Server (para Claude/Cursor)
+
+Servidor MCP (Model Context Protocol) que permite assistentes de IA interagirem diretamente com o PipeRun.
 
 ## Recursos
 
@@ -237,6 +253,59 @@ mcp-piperun/
 
 ### v0.1.0
 - Versão inicial com ferramentas básicas
+
+---
+
+# HTTP Server (para n8n/Zapier/Make)
+
+Servidor HTTP/REST para integração via requisições HTTP tradicionais.
+
+## Instalação Rápida
+
+```bash
+cd piperun-http-server
+npm install
+npm run build
+```
+
+## Executando
+
+```bash
+# Com variável de ambiente
+PIPERUN_API_TOKEN=seu_token npm start
+
+# Servidor roda em http://localhost:3000
+```
+
+## Uso com n8n
+
+1. Inicie o servidor HTTP
+2. No n8n, use o node **HTTP Request**
+3. Configure:
+   - **URL:** `http://localhost:3000/deals`
+   - **Header:** `X-PipeRun-Token: seu_token`
+
+## Endpoints Principais
+
+| Recurso | Endpoints |
+|---------|-----------|
+| Deals | `GET/POST /deals`, `GET/PUT/DELETE /deals/:id`, `POST /deals/search` |
+| Persons | `GET/POST /persons`, `GET/PUT/DELETE /persons/:id`, `POST /persons/search` |
+| Companies | `GET/POST /companies`, `GET/PUT/DELETE /companies/:id` |
+| Activities | `GET/POST /activities`, `GET/PUT/DELETE /activities/:id` |
+| Notes | `POST /notes`, `DELETE /notes/:id` |
+| Pipelines | `GET /pipelines`, `GET /stages` |
+
+## Docker
+
+```bash
+docker build -t piperun-http-server ./piperun-http-server
+docker run -p 3000:3000 -e PIPERUN_API_TOKEN=seu_token piperun-http-server
+```
+
+📖 **Documentação completa:** [piperun-http-server/README.md](./piperun-http-server/README.md)
+
+---
 
 ## Referências
 
