@@ -2,7 +2,7 @@
 
 Servidor MCP (Model Context Protocol) para integração com a API do [PipeRun CRM](https://www.pipe.run/).
 
-Este servidor permite que assistentes de IA (como Claude, Cline, etc.) interajam diretamente com o seu CRM PipeRun, possibilitando listar oportunidades, criar contatos, gerenciar empresas e muito mais.
+Este servidor permite que assistentes de IA (como Claude, Cline, etc.) interajam diretamente com o seu CRM PipeRun, possibilitando gerenciar oportunidades, contatos, empresas, atividades e muito mais.
 
 ## Pré-requisitos
 
@@ -97,17 +97,26 @@ Este servidor utiliza autenticação **por chamada de ferramenta**. Isso signifi
 Todas as ferramentas requerem o parâmetro `api_token`.
 
 ### Oportunidades (Deals)
+
 | Ferramenta | Descrição | Parâmetros |
 |------------|-----------|------------|
-| `list_deals` | Lista oportunidades | `pipeline_id`, `person_id`, `page`, `show` (opcionais) |
+| `list_deals` | Lista oportunidades | `pipeline_id`, `stage_id`, `person_id`, `company_id`, `owner_id`, `status`, `page`, `show` (opcionais) |
+| `get_deal` | Detalhes de uma oportunidade | `deal_id` (obrigatório) |
+| `create_deal` | Cria uma oportunidade | `title`, `pipeline_id`, `stage_id`, `owner_id` (obrigatórios); `person_id`, `company_id`, `value` (opcionais) |
+| `update_deal` | Atualiza uma oportunidade | `deal_id` (obrigatório); `title`, `pipeline_id`, `stage_id`, `owner_id`, `person_id`, `company_id`, `value`, `status` (opcionais) |
 | `list_deal_sources` | Lista origens de oportunidades | - |
 
 ### Pessoas (Contatos/Leads)
+
 | Ferramenta | Descrição | Parâmetros |
 |------------|-----------|------------|
-| `create_person` | Cria uma nova pessoa | `name`, `owner_id` (obrigatórios); `email`, `phone`, `company_id` (opcionais) |
+| `list_persons` | Lista pessoas | `owner_id`, `company_id`, `page`, `show` (opcionais) |
+| `get_person` | Detalhes de uma pessoa | `person_id` (obrigatório) |
+| `create_person` | Cria uma pessoa | `name`, `owner_id` (obrigatórios); `email`, `phone`, `company_id` (opcionais) |
+| `update_person` | Atualiza uma pessoa | `person_id` (obrigatório); `name`, `owner_id`, `email`, `phone`, `company_id` (opcionais) |
 
-### Empresas
+### Empresas (Companies)
+
 | Ferramenta | Descrição | Parâmetros |
 |------------|-----------|------------|
 | `list_companies` | Lista empresas | `page`, `show` (opcionais) |
@@ -116,24 +125,28 @@ Todas as ferramentas requerem o parâmetro `api_token`.
 | `update_company` | Atualiza uma empresa | `company_id` (obrigatório); `name`, `owner_id`, `email`, `phone` (opcionais) |
 
 ### Funis e Etapas
+
 | Ferramenta | Descrição | Parâmetros |
 |------------|-----------|------------|
 | `list_pipelines` | Lista funis | `page`, `show` (opcionais) |
 | `list_stages` | Lista etapas de funil | `pipeline_id`, `page`, `show` (opcionais) |
 
 ### Atividades
+
 | Ferramenta | Descrição | Parâmetros |
 |------------|-----------|------------|
-| `list_activities` | Lista atividades | Vários filtros: `deal_id`, `owner_id`, `status`, datas, etc. |
+| `list_activities` | Lista atividades | `deal_id`, `owner_id`, `activity_type_id`, `status`, `page`, `show` (opcionais) |
 | `list_activity_types` | Lista tipos de atividades | - |
 
 ### Notas
+
 | Ferramenta | Descrição | Parâmetros |
 |------------|-----------|------------|
 | `list_notes` | Lista notas | `deal_id`, `person_id`, `company_id`, `page`, `show` (opcionais) |
 | `create_note` | Cria uma nota | `content` (obrigatório); `deal_id`, `person_id` ou `company_id` (pelo menos um) |
 
 ### Outros
+
 | Ferramenta | Descrição | Parâmetros |
 |------------|-----------|------------|
 | `list_items` | Lista produtos | `page`, `show` (opcionais) |
@@ -151,6 +164,10 @@ Ao conversar com um assistente de IA configurado com este MCP, você pode fazer 
 > "Crie um novo contato chamado João Silva com email joao@empresa.com"
 
 > "Quais são os funis disponíveis no meu CRM?"
+
+> "Crie uma oportunidade chamada 'Projeto X' no funil principal"
+
+> "Atualize o status da oportunidade 12345 para ganha"
 
 > "Adicione uma nota na oportunidade 12345"
 
@@ -186,6 +203,19 @@ mcp-piperun/
 ├── test-piperun-api.js          # Script de teste da API
 └── piperun_mcp_plan.md          # Documento de planejamento
 ```
+
+## Changelog
+
+### v0.2.0
+- Adicionadas novas ferramentas: `list_persons`, `get_person`, `update_person`, `get_deal`, `create_deal`, `update_deal`
+- Adicionado timeout de 30 segundos nas requisições HTTP
+- Padronização dos tipos de schema (integer para IDs)
+- Validação de argumentos para todas as ferramentas de criação e atualização
+- Melhoria no tratamento de erros (timeout, validação, etc.)
+- Código refatorado para melhor manutenibilidade
+
+### v0.1.0
+- Versão inicial com ferramentas básicas de listagem e criação
 
 ## Referências
 
