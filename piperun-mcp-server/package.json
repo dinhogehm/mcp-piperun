@@ -1,6 +1,6 @@
 {
   "name": "piperun-mcp-server",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A Model Context Protocol server",
   "private": true,
   "type": "module",
@@ -14,14 +14,28 @@
     "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
     "prepare": "npm run build",
     "watch": "tsc --watch",
-    "inspector": "npx @modelcontextprotocol/inspector build/index.js"
+    "inspector": "npx @modelcontextprotocol/inspector build/index.js",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/",
+    "test": "node --experimental-vm-modules node_modules/vitest/vitest.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.1",
     "axios": "^1.8.4"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@types/node": "^20.11.24",
-    "typescript": "^5.3.3"
+    "@typescript-eslint/eslint-plugin": "^8.52.0",
+    "@typescript-eslint/parser": "^8.52.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.7.4",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.52.0",
+    "vitest": "^4.0.16"
   }
 }

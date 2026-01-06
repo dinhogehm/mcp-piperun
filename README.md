@@ -1,191 +1,198 @@
 # MCP PipeRun
 
+[![CI](https://github.com/dinhogehm/mcp-piperun/actions/workflows/ci.yml/badge.svg)](https://github.com/dinhogehm/mcp-piperun/actions/workflows/ci.yml)
+
 Servidor MCP (Model Context Protocol) para integração com a API do [PipeRun CRM](https://www.pipe.run/).
 
 Este servidor permite que assistentes de IA (como Claude, Cline, etc.) interajam diretamente com o seu CRM PipeRun, possibilitando gerenciar oportunidades, contatos, empresas, atividades e muito mais.
+
+## Recursos
+
+- **32 ferramentas** para gerenciar completamente o PipeRun
+- **CRUD completo** para deals, persons, companies, activities e notes
+- **Busca** por oportunidades e pessoas
+- **Respostas formatadas** - resumos legíveis ao invés de JSON bruto
+- **Retry automático** com backoff exponencial para resiliência
+- **Autenticação flexível** - via variável de ambiente ou por chamada
+- **TypeScript** com tipagem completa
+- **Testes automatizados** com Vitest
+- **CI/CD** com GitHub Actions
 
 ## Pré-requisitos
 
 - **Node.js** v18 ou superior
 - **npm** (geralmente instalado junto com o Node.js)
-- **Token da API do PipeRun** (veja como obter abaixo)
+- **Token da API do PipeRun**
 
 ## Instalação
 
 1. Clone o repositório:
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/dinhogehm/mcp-piperun.git
 cd mcp-piperun
 ```
 
-2. Instale as dependências e compile o servidor:
+2. Instale as dependências e compile:
 ```bash
 cd piperun-mcp-server
 npm install
 npm run build
 ```
 
-## Como Obter o Token da API do PipeRun
+## Como Obter o Token da API
 
 1. Faça login na sua conta do [PipeRun](https://app.pipe.run/)
 2. Acesse **Configurações** > **Integrações** > **API**
 3. Copie o seu **Token de API**
 
-> **Importante:** Guarde o token em local seguro. Ele será usado em cada chamada de ferramenta.
+## Configuração
 
-## Configuração no Cliente MCP
+### Opção 1: Variável de Ambiente (Recomendado)
 
-### Claude Desktop
-
-Adicione a configuração no arquivo de configuração do Claude Desktop:
-
-**MacOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-**Windows:** `%APPDATA%/Claude/claude_desktop_config.json`
-**Linux:** `~/.config/Claude/claude_desktop_config.json`
+Configure `PIPERUN_API_TOKEN` no seu ambiente:
 
 ```json
 {
   "mcpServers": {
     "piperun": {
       "command": "node",
-      "args": ["/caminho/completo/para/mcp-piperun/piperun-mcp-server/build/index.js"]
+      "args": ["/caminho/para/mcp-piperun/piperun-mcp-server/build/index.js"],
+      "env": {
+        "PIPERUN_API_TOKEN": "seu_token_aqui"
+      }
     }
   }
 }
 ```
 
-### Claude Code (CLI)
+### Opção 2: Token por Chamada
 
-Adicione a configuração ao arquivo `.claude/settings.json` do seu projeto ou nas configurações globais:
+Passe o `api_token` como argumento em cada chamada de ferramenta.
 
-```json
-{
-  "mcpServers": {
-    "piperun": {
-      "command": "node",
-      "args": ["/caminho/completo/para/mcp-piperun/piperun-mcp-server/build/index.js"]
-    }
-  }
-}
-```
+### Locais do Arquivo de Configuração
 
-### Cline (VS Code)
+- **Claude Desktop (MacOS):** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Claude Desktop (Windows):** `%APPDATA%/Claude/claude_desktop_config.json`
+- **Claude Desktop (Linux):** `~/.config/Claude/claude_desktop_config.json`
+- **Claude Code:** `.claude/settings.json`
 
-Adicione nas configurações MCP do Cline:
+## Ferramentas Disponíveis (32 total)
 
-```json
-{
-  "piperun-mcp-server": {
-    "command": "node",
-    "args": ["/caminho/completo/para/mcp-piperun/piperun-mcp-server/build/index.js"]
-  }
-}
-```
+### Oportunidades (Deals) - 7 ferramentas
 
-> **Nota:** Substitua `/caminho/completo/para/` pelo caminho real onde você clonou o repositório.
+| Ferramenta | Descrição |
+|------------|-----------|
+| `list_deals` | Lista oportunidades com filtros |
+| `get_deal` | Detalhes de uma oportunidade |
+| `create_deal` | Cria uma oportunidade |
+| `update_deal` | Atualiza uma oportunidade |
+| `delete_deal` | Exclui uma oportunidade |
+| `search_deals` | Busca por título |
+| `list_deal_sources` | Lista origens |
 
-## Autenticação
+### Pessoas (Persons) - 6 ferramentas
 
-Este servidor utiliza autenticação **por chamada de ferramenta**. Isso significa que você deve fornecer o `api_token` como argumento em cada chamada de ferramenta. Isso permite:
+| Ferramenta | Descrição |
+|------------|-----------|
+| `list_persons` | Lista pessoas/contatos |
+| `get_person` | Detalhes de uma pessoa |
+| `create_person` | Cria uma pessoa |
+| `update_person` | Atualiza uma pessoa |
+| `delete_person` | Exclui uma pessoa |
+| `search_persons` | Busca por nome/email |
 
-- Maior segurança (token não armazenado em variáveis de ambiente)
-- Flexibilidade para usar tokens diferentes se necessário
-- Controle granular sobre cada requisição
+### Empresas (Companies) - 5 ferramentas
 
-## Ferramentas Disponíveis
+| Ferramenta | Descrição |
+|------------|-----------|
+| `list_companies` | Lista empresas |
+| `get_company` | Detalhes de uma empresa |
+| `create_company` | Cria uma empresa |
+| `update_company` | Atualiza uma empresa |
+| `delete_company` | Exclui uma empresa |
 
-Todas as ferramentas requerem o parâmetro `api_token`.
+### Atividades - 6 ferramentas
 
-### Oportunidades (Deals)
+| Ferramenta | Descrição |
+|------------|-----------|
+| `list_activities` | Lista atividades |
+| `get_activity` | Detalhes de uma atividade |
+| `create_activity` | Cria uma atividade |
+| `update_activity` | Atualiza uma atividade |
+| `delete_activity` | Exclui uma atividade |
+| `list_activity_types` | Lista tipos |
 
-| Ferramenta | Descrição | Parâmetros |
-|------------|-----------|------------|
-| `list_deals` | Lista oportunidades | `pipeline_id`, `stage_id`, `person_id`, `company_id`, `owner_id`, `status`, `page`, `show` (opcionais) |
-| `get_deal` | Detalhes de uma oportunidade | `deal_id` (obrigatório) |
-| `create_deal` | Cria uma oportunidade | `title`, `pipeline_id`, `stage_id`, `owner_id` (obrigatórios); `person_id`, `company_id`, `value` (opcionais) |
-| `update_deal` | Atualiza uma oportunidade | `deal_id` (obrigatório); `title`, `pipeline_id`, `stage_id`, `owner_id`, `person_id`, `company_id`, `value`, `status` (opcionais) |
-| `list_deal_sources` | Lista origens de oportunidades | - |
+### Notas - 3 ferramentas
 
-### Pessoas (Contatos/Leads)
+| Ferramenta | Descrição |
+|------------|-----------|
+| `list_notes` | Lista notas |
+| `create_note` | Cria uma nota |
+| `delete_note` | Exclui uma nota |
 
-| Ferramenta | Descrição | Parâmetros |
-|------------|-----------|------------|
-| `list_persons` | Lista pessoas | `owner_id`, `company_id`, `page`, `show` (opcionais) |
-| `get_person` | Detalhes de uma pessoa | `person_id` (obrigatório) |
-| `create_person` | Cria uma pessoa | `name`, `owner_id` (obrigatórios); `email`, `phone`, `company_id` (opcionais) |
-| `update_person` | Atualiza uma pessoa | `person_id` (obrigatório); `name`, `owner_id`, `email`, `phone`, `company_id` (opcionais) |
+### Outros - 5 ferramentas
 
-### Empresas (Companies)
-
-| Ferramenta | Descrição | Parâmetros |
-|------------|-----------|------------|
-| `list_companies` | Lista empresas | `page`, `show` (opcionais) |
-| `get_company` | Detalhes de uma empresa | `company_id` (obrigatório) |
-| `create_company` | Cria uma empresa | `name`, `owner_id` (obrigatórios); `email`, `phone` (opcionais) |
-| `update_company` | Atualiza uma empresa | `company_id` (obrigatório); `name`, `owner_id`, `email`, `phone` (opcionais) |
-
-### Funis e Etapas
-
-| Ferramenta | Descrição | Parâmetros |
-|------------|-----------|------------|
-| `list_pipelines` | Lista funis | `page`, `show` (opcionais) |
-| `list_stages` | Lista etapas de funil | `pipeline_id`, `page`, `show` (opcionais) |
-
-### Atividades
-
-| Ferramenta | Descrição | Parâmetros |
-|------------|-----------|------------|
-| `list_activities` | Lista atividades | `deal_id`, `owner_id`, `activity_type_id`, `status`, `page`, `show` (opcionais) |
-| `list_activity_types` | Lista tipos de atividades | - |
-
-### Notas
-
-| Ferramenta | Descrição | Parâmetros |
-|------------|-----------|------------|
-| `list_notes` | Lista notas | `deal_id`, `person_id`, `company_id`, `page`, `show` (opcionais) |
-| `create_note` | Cria uma nota | `content` (obrigatório); `deal_id`, `person_id` ou `company_id` (pelo menos um) |
-
-### Outros
-
-| Ferramenta | Descrição | Parâmetros |
-|------------|-----------|------------|
-| `list_items` | Lista produtos | `page`, `show` (opcionais) |
-| `list_users` | Lista usuários/vendedores | `page`, `show` (opcionais) |
-| `list_custom_fields` | Lista campos customizados | - |
-| `list_tags` | Lista tags | - |
-| `list_loss_reasons` | Lista motivos de perda | - |
+| Ferramenta | Descrição |
+|------------|-----------|
+| `list_pipelines` | Lista funis |
+| `list_stages` | Lista etapas |
+| `list_items` | Lista produtos |
+| `list_users` | Lista usuários |
+| `list_custom_fields` | Lista campos customizados |
+| `list_tags` | Lista tags |
+| `list_loss_reasons` | Lista motivos de perda |
 
 ## Exemplos de Uso
 
-Ao conversar com um assistente de IA configurado com este MCP, você pode fazer requisições como:
+```
+> Liste minhas oportunidades abertas
 
-> "Liste minhas oportunidades no PipeRun"
+[12345] Projeto ABC | R$ 50.000 | Aberta | Etapa: Negociação | Responsável: João
+[12346] Contrato XYZ | R$ 25.000 | Aberta | Etapa: Proposta | Responsável: Maria
 
-> "Crie um novo contato chamado João Silva com email joao@empresa.com"
+📊 Total: 2 | Página: 1/1
+```
 
-> "Quais são os funis disponíveis no meu CRM?"
+```
+> Crie uma oportunidade "Novo Cliente" no funil 1, etapa 1, responsável 100
 
-> "Crie uma oportunidade chamada 'Projeto X' no funil principal"
+✅ Oportunidade criada com sucesso!
+[12347] Novo Cliente | Sem valor | Aberta | Etapa: Prospecção | Responsável: João
+```
 
-> "Atualize o status da oportunidade 12345 para ganha"
+```
+> Busque pessoas com nome "Silva"
 
-> "Adicione uma nota na oportunidade 12345"
+🔍 Busca por "Silva":
 
-O assistente irá solicitar o token da API se necessário e executar as operações correspondentes.
+[100] João Silva | joao@email.com | 11999999999 | Empresa: ABC Ltda
+[101] Maria Silva | maria@email.com | Sem contato | Empresa: N/A
+
+📊 Total: 2 | Página: 1/1
+```
 
 ## Desenvolvimento
 
-Para desenvolvimento com recompilação automática:
-
 ```bash
-cd piperun-mcp-server
+# Instalar dependências
+npm install
+
+# Compilar
+npm run build
+
+# Modo watch (recompila automaticamente)
 npm run watch
-```
 
-Para depuração, use o MCP Inspector:
+# Executar linter
+npm run lint
 
-```bash
-cd piperun-mcp-server
+# Formatar código
+npm run format
+
+# Executar testes
+npx vitest run
+
+# Depuração com MCP Inspector
 npm run inspector
 ```
 
@@ -193,29 +200,43 @@ npm run inspector
 
 ```
 mcp-piperun/
-├── README.md                    # Este arquivo
-├── piperun-mcp-server/          # Servidor MCP
+├── .github/
+│   └── workflows/
+│       └── ci.yml              # GitHub Actions CI/CD
+├── piperun-mcp-server/
 │   ├── src/
-│   │   └── index.ts            # Código fonte principal
-│   ├── build/                   # Código compilado (após npm run build)
+│   │   ├── index.ts           # Código principal
+│   │   └── __tests__/         # Testes
+│   ├── build/                  # Código compilado
+│   ├── eslint.config.js       # Configuração ESLint
+│   ├── vitest.config.ts       # Configuração Vitest
+│   ├── .prettierrc            # Configuração Prettier
 │   ├── package.json
 │   └── tsconfig.json
-├── test-piperun-api.js          # Script de teste da API
-└── piperun_mcp_plan.md          # Documento de planejamento
+├── .gitignore
+└── README.md
 ```
 
 ## Changelog
 
+### v0.3.0
+- Adicionadas ferramentas de delete (deal, person, company, activity, note)
+- Adicionadas ferramentas de atividades (get, create, update)
+- Adicionadas ferramentas de busca (search_deals, search_persons)
+- Adicionado retry com backoff exponencial (3 tentativas)
+- Adicionada autenticação via variável de ambiente `PIPERUN_API_TOKEN`
+- Respostas formatadas com resumos legíveis
+- Configuração de ESLint + Prettier
+- Testes automatizados com Vitest
+- CI/CD com GitHub Actions
+
 ### v0.2.0
-- Adicionadas novas ferramentas: `list_persons`, `get_person`, `update_person`, `get_deal`, `create_deal`, `update_deal`
-- Adicionado timeout de 30 segundos nas requisições HTTP
-- Padronização dos tipos de schema (integer para IDs)
-- Validação de argumentos para todas as ferramentas de criação e atualização
-- Melhoria no tratamento de erros (timeout, validação, etc.)
-- Código refatorado para melhor manutenibilidade
+- Adicionadas ferramentas: list_persons, get_person, update_person, get_deal, create_deal, update_deal
+- Timeout de 30 segundos nas requisições
+- Validação de argumentos para todas as operações
 
 ### v0.1.0
-- Versão inicial com ferramentas básicas de listagem e criação
+- Versão inicial com ferramentas básicas
 
 ## Referências
 
