@@ -4,6 +4,14 @@
 
 Integração completa com a API do [PipeRun CRM](https://www.pipe.run/).
 
+---
+
+> ## **Usa n8n?** [Clique aqui para o Guia Completo de Integração com n8n](./docs/GUIA-N8N.md)
+>
+> Inclui: instalação passo a passo, exemplos práticos, workflows prontos e referência completa de endpoints.
+
+---
+
 ## Duas Versões Disponíveis
 
 | Versão | Diretório | Para Quem |
