@@ -1485,7 +1485,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description:
                 '(Opcional) Tipo: 1=Oportunidade, 2=Atividade, 3=Previsão, 4=Proposta, 5=Ligação, 6=Assinatura',
             },
-            start_at: { type: 'string', description: '(Opcional) Nova data de início (yyyy-mm-dd)' },
+            start_at: {
+              type: 'string',
+              description: '(Opcional) Nova data de início (yyyy-mm-dd)',
+            },
             end_at: {
               type: 'string',
               description: '(Opcional) Nova data de término (yyyy-mm-dd)',
@@ -1504,7 +1507,10 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
               description:
                 '(Opcional) Período: 0=Personalizado, 1=Diário, 2=Semanal, 3=Quinzenal, 4=Mensal, 5=Bimestral, 6=Trimestral, 7=Semestral, 8=Anual',
             },
-            activity_type_id: { type: 'integer', description: '(Opcional) ID do tipo de atividade' },
+            activity_type_id: {
+              type: 'integer',
+              description: '(Opcional) ID do tipo de atividade',
+            },
             origin_id: { type: 'integer', description: '(Opcional) ID da origem' },
             region_id: { type: 'integer', description: '(Opcional) ID da região' },
             city_id: { type: 'integer', description: '(Opcional) ID da cidade' },
