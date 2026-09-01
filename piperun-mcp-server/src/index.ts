@@ -84,6 +84,7 @@ const ENDPOINT_MAP: Record<string, string> = {
   list_pipelines: '/pipelines',
   list_stages: '/stages',
   list_items: '/items',
+  list_custom_forms: '/customForms',
   list_users: '/users',
   list_activities: '/activities',
   list_companies: '/companies',
@@ -257,6 +258,47 @@ interface UpdateItemArgs {
   description?: string;
   photo?: string;
   brand_id?: number;
+}
+
+interface CreateCustomFormArgs {
+  name: string;
+  type: number;
+  status: boolean;
+  pipelines?: number[];
+  activityTypes?: number[];
+  page_title?: string;
+  page_content?: string;
+  page_background_color?: string;
+  page_text_color?: string;
+  page_logo_url?: string;
+  form_background_color?: string;
+  form_text_color?: string;
+  form_button_background_color?: string;
+  form_button_text_color?: string;
+  form_with_rounded_borders?: boolean;
+  form_show_icons?: boolean;
+  fields?: unknown;
+}
+
+interface UpdateCustomFormArgs {
+  custom_form_id: number;
+  name?: string;
+  type?: number;
+  status?: boolean;
+  pipelines?: number[];
+  activityTypes?: number[];
+  page_title?: string;
+  page_content?: string;
+  page_background_color?: string;
+  page_text_color?: string;
+  page_logo_url?: string;
+  form_background_color?: string;
+  form_text_color?: string;
+  form_button_background_color?: string;
+  form_button_text_color?: string;
+  form_with_rounded_borders?: boolean;
+  form_show_icons?: boolean;
+  fields?: unknown;
 }
 
 // Type guards
@@ -445,6 +487,58 @@ function isValidUpdateItemArgs(args: unknown): args is UpdateItemArgs {
   );
 }
 
+function isValidCreateCustomFormArgs(args: unknown): args is CreateCustomFormArgs {
+  if (typeof args !== 'object' || args === null) return false;
+  const a = args as Record<string, unknown>;
+  return (
+    typeof a.name === 'string' &&
+    a.name.trim() !== '' &&
+    typeof a.type === 'number' &&
+    typeof a.status === 'boolean' &&
+    (a.pipelines === undefined || Array.isArray(a.pipelines)) &&
+    (a.activityTypes === undefined || Array.isArray(a.activityTypes)) &&
+    (a.page_title === undefined || typeof a.page_title === 'string') &&
+    (a.page_content === undefined || typeof a.page_content === 'string') &&
+    (a.page_background_color === undefined || typeof a.page_background_color === 'string') &&
+    (a.page_text_color === undefined || typeof a.page_text_color === 'string') &&
+    (a.page_logo_url === undefined || typeof a.page_logo_url === 'string') &&
+    (a.form_background_color === undefined || typeof a.form_background_color === 'string') &&
+    (a.form_text_color === undefined || typeof a.form_text_color === 'string') &&
+    (a.form_button_background_color === undefined ||
+      typeof a.form_button_background_color === 'string') &&
+    (a.form_button_text_color === undefined || typeof a.form_button_text_color === 'string') &&
+    (a.form_with_rounded_borders === undefined ||
+      typeof a.form_with_rounded_borders === 'boolean') &&
+    (a.form_show_icons === undefined || typeof a.form_show_icons === 'boolean')
+  );
+}
+
+function isValidUpdateCustomFormArgs(args: unknown): args is UpdateCustomFormArgs {
+  if (typeof args !== 'object' || args === null) return false;
+  const a = args as Record<string, unknown>;
+  return (
+    typeof a.custom_form_id === 'number' &&
+    (a.name === undefined || typeof a.name === 'string') &&
+    (a.type === undefined || typeof a.type === 'number') &&
+    (a.status === undefined || typeof a.status === 'boolean') &&
+    (a.pipelines === undefined || Array.isArray(a.pipelines)) &&
+    (a.activityTypes === undefined || Array.isArray(a.activityTypes)) &&
+    (a.page_title === undefined || typeof a.page_title === 'string') &&
+    (a.page_content === undefined || typeof a.page_content === 'string') &&
+    (a.page_background_color === undefined || typeof a.page_background_color === 'string') &&
+    (a.page_text_color === undefined || typeof a.page_text_color === 'string') &&
+    (a.page_logo_url === undefined || typeof a.page_logo_url === 'string') &&
+    (a.form_background_color === undefined || typeof a.form_background_color === 'string') &&
+    (a.form_text_color === undefined || typeof a.form_text_color === 'string') &&
+    (a.form_button_background_color === undefined ||
+      typeof a.form_button_background_color === 'string') &&
+    (a.form_button_text_color === undefined || typeof a.form_button_text_color === 'string') &&
+    (a.form_with_rounded_borders === undefined ||
+      typeof a.form_with_rounded_borders === 'boolean') &&
+    (a.form_show_icons === undefined || typeof a.form_show_icons === 'boolean')
+  );
+}
+
 // ============================================================================
 // FORMATADORES DE RESPOSTA
 // ============================================================================
@@ -520,6 +614,16 @@ interface ItemData {
   status?: boolean;
   minimum_value?: number;
   description?: string;
+}
+
+interface CustomFormData {
+  id: number;
+  name: string;
+  type?: number;
+  status?: boolean;
+  page_title?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 interface ApiResponse<T> {
@@ -599,6 +703,13 @@ function formatItemSummary(item: ItemData): string {
     : 'Sem valor';
   const status = item.status === true ? 'Inativo' : 'Ativo';
   return `[${item.id}] ${item.name} | ${type} | ${value} | ${status}${item.code ? ` | Código: ${item.code}` : ''}`;
+}
+
+function formatCustomFormSummary(form: CustomFormData): string {
+  const typeMap: Record<number, string> = { 1: 'Oportunidades', 2: 'Empresas', 3: 'Pessoas' };
+  const type = typeMap[form.type ?? 0] ?? 'N/A';
+  const status = form.status === true ? 'Ativo' : 'Inativo';
+  return `[${form.id}] ${form.name} | Vínculo: ${type} | ${status}`;
 }
 
 function formatListResponse<T>(
@@ -1229,6 +1340,204 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['item_id'],
         },
       },
+
+      // ===== FORMULÁRIOS CUSTOMIZADOS =====
+      {
+        name: 'list_custom_forms',
+        description: 'Lista formulários customizados.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            api_token: {
+              type: 'string',
+              description: 'Token da API (opcional se PIPERUN_API_TOKEN configurado)',
+            },
+            name: { type: 'string', description: '(Opcional) Filtrar por nome do formulário' },
+            sort: { type: 'string', description: '(Opcional) Ordenação: ASC ou DESC' },
+            show: { type: 'integer', description: '(Opcional) Itens por página' },
+            cursor: { type: 'string', description: '(Opcional) Cursor de paginação' },
+            created_at_start: {
+              type: 'string',
+              description: '(Opcional) Data/hora inicial de criação (ISO 8601)',
+            },
+            created_at_end: {
+              type: 'string',
+              description: '(Opcional) Data/hora final de criação (ISO 8601)',
+            },
+            updated_at_start: {
+              type: 'string',
+              description: '(Opcional) Data/hora inicial de atualização (ISO 8601)',
+            },
+            updated_at_end: {
+              type: 'string',
+              description: '(Opcional) Data/hora final de atualização (ISO 8601)',
+            },
+          },
+          required: [],
+        },
+      },
+      {
+        name: 'get_custom_form',
+        description: 'Obtém detalhes de um formulário customizado.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            api_token: {
+              type: 'string',
+              description: 'Token da API (opcional se PIPERUN_API_TOKEN configurado)',
+            },
+            custom_form_id: { type: 'integer', description: 'ID do formulário customizado' },
+          },
+          required: ['custom_form_id'],
+        },
+      },
+      {
+        name: 'create_custom_form',
+        description: 'Cria um novo formulário customizado.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            api_token: {
+              type: 'string',
+              description: 'Token da API (opcional se PIPERUN_API_TOKEN configurado)',
+            },
+            name: { type: 'string', description: 'Nome do formulário customizado' },
+            type: {
+              type: 'integer',
+              description: 'Entidade de vínculo: 1=oportunidades, 2=empresas, 3=pessoas',
+            },
+            status: { type: 'boolean', description: 'false=inativo, true=ativo' },
+            pipelines: {
+              type: 'array',
+              items: { type: 'integer' },
+              description: '(Opcional) IDs dos funis onde o formulário estará disponível',
+            },
+            activityTypes: {
+              type: 'array',
+              items: { type: 'integer' },
+              description:
+                '(Opcional) IDs dos tipos de atividade após os quais o formulário é exibido',
+            },
+            page_title: {
+              type: 'string',
+              description: '(Opcional) Título da página do formulário',
+            },
+            page_content: {
+              type: 'string',
+              description: '(Opcional) Texto de conteúdo da página do formulário',
+            },
+            page_background_color: {
+              type: 'string',
+              description: '(Opcional) Cor de fundo da página pública',
+            },
+            page_text_color: { type: 'string', description: '(Opcional) Cor do texto da página' },
+            page_logo_url: { type: 'string', description: '(Opcional) URL do logo exibido' },
+            form_background_color: {
+              type: 'string',
+              description: '(Opcional) Cor de fundo do formulário',
+            },
+            form_text_color: {
+              type: 'string',
+              description: '(Opcional) Cor do texto do formulário',
+            },
+            form_button_background_color: {
+              type: 'string',
+              description: '(Opcional) Cor de fundo do botão',
+            },
+            form_button_text_color: {
+              type: 'string',
+              description: '(Opcional) Cor do texto do botão',
+            },
+            form_with_rounded_borders: {
+              type: 'boolean',
+              description: '(Opcional) Aplicar bordas arredondadas ao formulário',
+            },
+            form_show_icons: {
+              type: 'boolean',
+              description: '(Opcional) Exibir ícones nos campos do formulário',
+            },
+            fields: {
+              type: 'array',
+              description: '(Opcional) Campos (nativos ou customizados) do formulário',
+            },
+          },
+          required: ['name', 'type', 'status'],
+        },
+      },
+      {
+        name: 'update_custom_form',
+        description: 'Atualiza um formulário customizado existente.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            api_token: {
+              type: 'string',
+              description: 'Token da API (opcional se PIPERUN_API_TOKEN configurado)',
+            },
+            custom_form_id: { type: 'integer', description: 'ID do formulário customizado' },
+            name: { type: 'string', description: '(Opcional) Novo nome' },
+            type: {
+              type: 'integer',
+              description: '(Opcional) Entidade de vínculo: 1=oportunidades, 2=empresas, 3=pessoas',
+            },
+            status: { type: 'boolean', description: '(Opcional) false=inativo, true=ativo' },
+            pipelines: {
+              type: 'array',
+              items: { type: 'integer' },
+              description: '(Opcional) IDs dos funis onde o formulário estará disponível',
+            },
+            activityTypes: {
+              type: 'array',
+              items: { type: 'integer' },
+              description:
+                '(Opcional) IDs dos tipos de atividade após os quais o formulário é exibido',
+            },
+            page_title: {
+              type: 'string',
+              description: '(Opcional) Título da página do formulário',
+            },
+            page_content: {
+              type: 'string',
+              description: '(Opcional) Texto de conteúdo da página do formulário',
+            },
+            page_background_color: {
+              type: 'string',
+              description: '(Opcional) Cor de fundo da página pública',
+            },
+            page_text_color: { type: 'string', description: '(Opcional) Cor do texto da página' },
+            page_logo_url: { type: 'string', description: '(Opcional) URL do logo exibido' },
+            form_background_color: {
+              type: 'string',
+              description: '(Opcional) Cor de fundo do formulário',
+            },
+            form_text_color: {
+              type: 'string',
+              description: '(Opcional) Cor do texto do formulário',
+            },
+            form_button_background_color: {
+              type: 'string',
+              description: '(Opcional) Cor de fundo do botão',
+            },
+            form_button_text_color: {
+              type: 'string',
+              description: '(Opcional) Cor do texto do botão',
+            },
+            form_with_rounded_borders: {
+              type: 'boolean',
+              description: '(Opcional) Aplicar bordas arredondadas ao formulário',
+            },
+            form_show_icons: {
+              type: 'boolean',
+              description: '(Opcional) Exibir ícones nos campos do formulário',
+            },
+            fields: {
+              type: 'array',
+              description: '(Opcional) Campos (nativos ou customizados) do formulário',
+            },
+          },
+          required: ['custom_form_id'],
+        },
+      },
       {
         name: 'list_users',
         description: 'Lista usuários/vendedores.',
@@ -1660,6 +1969,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
             },
           ],
         };
+      } else if (name === 'list_custom_forms') {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: formatListResponse(
+                data as ApiResponse<CustomFormData>,
+                formatCustomFormSummary,
+                'formulário customizado'
+              ),
+            },
+          ],
+        };
       }
 
       return { content: [{ type: 'text', text: JSON.stringify(data, null, 2) }] };
@@ -1986,6 +2308,76 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
         const item = data.data as ItemData;
         return {
           content: [{ type: 'text', text: `✅ Item atualizado!\n${formatItemSummary(item)}` }],
+        };
+      }
+
+      // ===== FORMULÁRIOS CUSTOMIZADOS =====
+      case 'get_custom_form': {
+        if (typeof toolArgs.custom_form_id !== 'number') {
+          throw new McpError(ErrorCode.InvalidParams, "'custom_form_id' é obrigatório.");
+        }
+        const data = await requestWithRetry<ApiResponse<CustomFormData>>({
+          method: 'GET',
+          url: `/customForms/${toolArgs.custom_form_id}`,
+          headers,
+        });
+        const form = data.data as CustomFormData;
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Formulário encontrado:\n${formatCustomFormSummary(form)}\n\nDetalhes:\n${JSON.stringify(form, null, 2)}`,
+            },
+          ],
+        };
+      }
+
+      case 'create_custom_form': {
+        if (!isValidCreateCustomFormArgs(toolArgs)) {
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            "'name', 'type' e 'status' são obrigatórios."
+          );
+        }
+        const data = await requestWithRetry<ApiResponse<CustomFormData>>({
+          method: 'POST',
+          url: '/customForms',
+          data: toolArgs,
+          headers,
+        });
+        const form = data.data as CustomFormData;
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `✅ Formulário customizado criado!\n${formatCustomFormSummary(form)}`,
+            },
+          ],
+        };
+      }
+
+      case 'update_custom_form': {
+        if (!isValidUpdateCustomFormArgs(toolArgs)) {
+          throw new McpError(ErrorCode.InvalidParams, "'custom_form_id' é obrigatório.");
+        }
+        const { custom_form_id, ...updateData } = toolArgs;
+        if (Object.keys(updateData).length === 0) {
+          throw new McpError(ErrorCode.InvalidParams, 'Nenhum dado para atualizar.');
+        }
+        const data = await requestWithRetry<ApiResponse<CustomFormData>>({
+          method: 'PUT',
+          url: `/customForms/${custom_form_id}`,
+          data: updateData,
+          headers,
+        });
+        const form = data.data as CustomFormData;
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `✅ Formulário customizado atualizado!\n${formatCustomFormSummary(form)}`,
+            },
+          ],
         };
       }
 
