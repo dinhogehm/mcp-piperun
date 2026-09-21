@@ -91,7 +91,7 @@ const ENDPOINT_MAP: Record<string, string> = {
   list_tags: '/tags',
   list_loss_reasons: '/loss-reasons',
   list_deal_sources: '/deal-sources',
-  list_activity_types: '/activity-types',
+  list_activity_types: '/activityTypes',
   list_custom_fields: '/custom-fields',
   list_notes: '/notes',
 };
@@ -2607,10 +2607,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
             "'content' e pelo menos um ID (deal_id, person_id ou company_id) são obrigatórios."
           );
         }
+        // A API do PipeRun espera o campo 'text'; a tool expõe 'content'.
+        const { content, ...noteRest } = toolArgs as Record<string, unknown>;
         const data = await requestWithRetry({
           method: 'POST',
           url: '/notes',
-          data: toolArgs,
+          data: { ...noteRest, text: content },
           headers,
         });
         return {
